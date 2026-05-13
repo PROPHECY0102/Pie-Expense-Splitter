@@ -1,0 +1,6 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { ExpenseFormPage } from '@/components/expenses/ExpenseFormPage'
+
+export const Route = createFileRoute('/app/groups/$groupId/expenses/$expenseId')({
+  component: () => <ExpenseFormPage mode="edit" />,
+})

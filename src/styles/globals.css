@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Pie brand HSL tokens */
+    --crust: 22 70% 70%;          /* warm peach */
+    --berry: 351 50% 53%;         /* muted raspberry */
+    --vanilla: 38 65% 95%;        /* cream */
+    --cocoa: 22 35% 18%;          /* dark chocolate */
+    --filling: 38 50% 88%;        /* light cream */
+
+    /* shadcn token mapping */
+    --background: var(--vanilla);
+    --foreground: var(--cocoa);
+
+    --card: 38 65% 98%;
+    --card-foreground: var(--cocoa);
+
+    --popover: 38 65% 98%;
+    --popover-foreground: var(--cocoa);
+
+    --primary: var(--crust);
+    --primary-foreground: 22 60% 14%;
+
+    --secondary: var(--filling);
+    --secondary-foreground: var(--cocoa);
+
+    --muted: 38 40% 90%;
+    --muted-foreground: 22 18% 38%;
+
+    --accent: var(--berry);
+    --accent-foreground: 38 65% 98%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 38 65% 98%;
+
+    --success: 142 45% 40%;
+
+    --border: 30 28% 82%;
+    --input: 30 28% 82%;
+    --ring: var(--crust);
+
+    --radius: 0.85rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html, body, #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif tracking-tight;
+    font-feature-settings: 'ss01';
+  }
+
+  /* Subtle textured background on body */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(1200px 600px at 12% -10%, hsl(var(--crust) / 0.22), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, hsl(var(--berry) / 0.10), transparent 55%),
+      radial-gradient(800px 600px at 50% 110%, hsl(var(--crust) / 0.08), transparent 60%);
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .card-soft {
+    @apply bg-card/85 backdrop-blur-sm border border-border/70 shadow-[0_1px_2px_rgba(61,44,32,0.04),0_8px_24px_-12px_rgba(61,44,32,0.12)];
+  }
+  .text-balance { text-wrap: balance; }
+}
