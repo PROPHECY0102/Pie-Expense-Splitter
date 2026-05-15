@@ -17,14 +17,24 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useStore } from '@/store'
 
-const schema = z.object({
-  name: z.string().min(1, 'Name is required').max(40),
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Enter a valid email')
-    .max(80),
-})
+const schema = z
+  .object({
+    name: z.string().min(1, 'Name is required').max(40),
+    email: z
+      .string()
+      .min(1, 'Email is required')
+      .email('Enter a valid email')
+      .max(80),
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters')
+      .max(80),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((v) => v.password === v.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Passwords do not match',
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -35,7 +45,7 @@ export function RegisterPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', email: '' },
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
   })
 
   function onSubmit(values: FormValues) {
@@ -46,7 +56,11 @@ export function RegisterPage() {
       })
       return
     }
-    const user = registerUser({ name: values.name, email: normalizedEmail })
+    const user = registerUser({
+      name: values.name,
+      email: normalizedEmail,
+      password: values.password,
+    })
     toast.success(`Welcome, ${user.name}! 🥧`)
     navigate({ to: '/app' })
   }
@@ -93,7 +107,43 @@ export function RegisterPage() {
                     {...field}
                   />
                 </FormControl>
-                <FormDescription>Used only to identify you locally.</FormDescription>
+                <FormDescription>Used to sign in on this device.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="At least 6 characters"
+                    autoComplete="new-password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Re-enter password"
+                    autoComplete="new-password"
+                    {...field}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

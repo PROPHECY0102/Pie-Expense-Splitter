@@ -21,8 +21,7 @@ export function GroupDetailLayout({ children }: Props) {
   const preferences = useStore((s) => s.preferences)
   const currentUserId = useCurrentUserId()
   const { net } = useGroupBalances(groupId)
-  const routerState = useRouterState()
-  const path = routerState.location.pathname
+  const path = useRouterState({ select: (s) => s.location.pathname })
 
   if (!group || !groupId) return null
 

@@ -16,6 +16,7 @@ import type {
 } from '@/types'
 import { colorFromString } from '@/lib/utils'
 import { resolveSplit } from '@/lib/split'
+import { hashPassword, verifyPassword } from '@/lib/password'
 
 interface AppState {
   currentUserId: ID | null
@@ -27,7 +28,11 @@ interface AppState {
   preferences: Preferences
 
   // Session
-  registerUser: (input: { name: string; email: string }) => User
+  registerUser: (input: { name: string; email: string; password: string }) => User
+  loginWithPassword: (
+    email: string,
+    password: string,
+  ) => { ok: true; user: User } | { ok: false; reason: 'not_found' | 'wrong_password' }
   loginAs: (userId: ID) => void
   logout: () => void
   updateProfile: (userId: ID, patch: Partial<Pick<User, 'name' | 'email'>>) => void
@@ -128,16 +133,28 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       ...emptyState,
 
-      registerUser: ({ name, email }) => {
+      registerUser: ({ name, email, password }) => {
         const user: User = {
           id: nanoid(10),
           name: name.trim(),
           email: email.trim().toLowerCase(),
+          passwordHash: hashPassword(password),
           avatarColor: colorFromString(name + email),
           createdAt: Date.now(),
         }
         set((s) => ({ users: [...s.users, user], currentUserId: user.id }))
         return user
+      },
+
+      loginWithPassword: (email, password) => {
+        const normalized = email.trim().toLowerCase()
+        const user = get().users.find((u) => u.email === normalized)
+        if (!user) return { ok: false, reason: 'not_found' }
+        if (!verifyPassword(password, user.passwordHash)) {
+          return { ok: false, reason: 'wrong_password' }
+        }
+        set({ currentUserId: user.id })
+        return { ok: true, user }
       },
 
       loginAs: (userId) => set({ currentUserId: userId }),
@@ -318,7 +335,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'pie:v1',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         currentUserId: state.currentUserId,
@@ -329,9 +346,17 @@ export const useStore = create<AppState>()(
         settlements: state.settlements,
         preferences: state.preferences,
       }),
-      migrate: (persisted, _version) => {
-        // Stub for future migrations.
-        return persisted as AppState
+      migrate: (persisted, version) => {
+        const state = persisted as AppState
+        if (version < 2 && Array.isArray(state.users)) {
+          // Pre-password users get a default password of "password" so existing
+          // local data isn't orphaned. Users can update it after signing in.
+          const fallback = hashPassword('password')
+          state.users = state.users.map((u) =>
+            u.passwordHash ? u : { ...u, passwordHash: fallback },
+          )
+        }
+        return state
       },
     },
   ),

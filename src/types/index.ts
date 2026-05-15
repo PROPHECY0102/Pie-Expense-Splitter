@@ -4,6 +4,8 @@ export interface User {
   id: ID
   name: string
   email: string
+  /** Obfuscated password used to simulate authentication locally. Not real crypto. */
+  passwordHash: string
   avatarColor: string
   createdAt: number
 }

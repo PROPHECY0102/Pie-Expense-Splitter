@@ -16,11 +16,13 @@ import { CategoryPie } from '@/components/charts/CategoryPie'
 export function ExpensesTab() {
   const { group } = useGroupContext()
   const currentUserId = useCurrentUserId()
-  const expenses = useStore((s) =>
-    group ? s.expenses.filter((e) => e.groupId === group.id) : [],
-  )
+  const allExpenses = useStore((s) => s.expenses)
   const users = useStore((s) => s.users)
   const preferences = useStore((s) => s.preferences)
+  const expenses = useMemo(
+    () => (group ? allExpenses.filter((e) => e.groupId === group.id) : []),
+    [group, allExpenses],
+  )
 
   const sorted = useMemo(
     () => [...expenses].sort((a, b) => b.date - a.date || b.createdAt - a.createdAt),

@@ -60,10 +60,11 @@ export function GroupsList() {
           }
         />
       ) : (
-        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 items-stretch">
           {rows.map((row, i) => (
             <motion.div
               key={row.group.id}
+              className="h-full"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}

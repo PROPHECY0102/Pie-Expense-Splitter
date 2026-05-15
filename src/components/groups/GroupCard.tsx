@@ -38,7 +38,7 @@ export function GroupCard({ group, myNetCents }: GroupCardProps) {
     <Link
       to="/app/groups/$groupId"
       params={{ groupId: group.id }}
-      className="group rounded-2xl border border-border bg-card/85 backdrop-blur-sm p-5 hover:border-accent/40 hover:shadow-[0_12px_30px_-15px_rgba(61,44,32,0.2)] transition-all"
+      className="group block h-full rounded-2xl border border-border bg-card/85 backdrop-blur-sm p-5 hover:border-accent/40 hover:shadow-[0_12px_30px_-15px_rgba(61,44,32,0.2)] transition-all"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">

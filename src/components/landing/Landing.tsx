@@ -12,28 +12,40 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PieLogo, PieWordmark } from '@/components/common/PieLogo'
+import { UserSwitcher } from '@/components/layout/UserSwitcher'
 import { useStore } from '@/store'
+import { useCurrentUser } from '@/hooks/useCurrentUser'
 
 export function Landing() {
   const currentUserId = useStore((s) => s.currentUserId)
-  const primaryHref = currentUserId ? '/app' : '/register'
-  const primaryLabel = currentUserId ? 'Open Pie' : 'Get started — it’s free'
+  const isSignedIn = Boolean(currentUserId)
+  const primaryHref = isSignedIn ? '/app' : '/register'
+  const primaryLabel = isSignedIn ? 'Open Pie' : 'Get started — it’s free'
 
   return (
     <div className="min-h-screen flex flex-col">
       <LandingNav />
       <main className="flex-1">
-        <Hero primaryHref={primaryHref} primaryLabel={primaryLabel} />
+        <Hero
+          primaryHref={primaryHref}
+          primaryLabel={primaryLabel}
+          isSignedIn={isSignedIn}
+        />
         <Features />
         <HowItWorks />
-        <CTA primaryHref={primaryHref} primaryLabel={primaryLabel} />
+        <CTA
+          primaryHref={primaryHref}
+          primaryLabel={primaryLabel}
+          isSignedIn={isSignedIn}
+        />
       </main>
-      <Footer />
+      <Footer isSignedIn={isSignedIn} />
     </div>
   )
 }
 
 function LandingNav() {
+  const current = useCurrentUser()
   return (
     <header className="sticky top-0 z-30 backdrop-blur-md bg-background/70 border-b border-border/60">
       <div className="container flex h-16 items-center justify-between">
@@ -41,21 +53,42 @@ function LandingNav() {
           <PieWordmark />
         </Link>
         <nav className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/login">Log in</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link to="/register">
-              Sign up <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
+          {current ? (
+            <>
+              <Button asChild size="sm">
+                <Link to="/app">
+                  Open Pie <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+              <UserSwitcher />
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/login">Log in</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link to="/register">
+                  Sign up <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </>
+          )}
         </nav>
       </div>
     </header>
   )
 }
 
-function Hero({ primaryHref, primaryLabel }: { primaryHref: string; primaryLabel: string }) {
+function Hero({
+  primaryHref,
+  primaryLabel,
+  isSignedIn,
+}: {
+  primaryHref: string
+  primaryLabel: string
+  isSignedIn: boolean
+}) {
   return (
     <section className="relative overflow-hidden">
       <div className="container py-20 md:py-28 grid lg:grid-cols-[1.1fr,1fr] gap-12 items-center">
@@ -81,9 +114,11 @@ function Hero({ primaryHref, primaryLabel }: { primaryHref: string; primaryLabel
                 {primaryLabel} <ArrowRight className="ml-1 h-5 w-5" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="text-base">
-              <Link to="/login">I have an account</Link>
-            </Button>
+            {isSignedIn ? null : (
+              <Button asChild size="lg" variant="outline" className="text-base">
+                <Link to="/login">I have an account</Link>
+              </Button>
+            )}
           </div>
           <div className="mt-6 flex items-center gap-4 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
@@ -259,7 +294,15 @@ function HowItWorks() {
   )
 }
 
-function CTA({ primaryHref, primaryLabel }: { primaryHref: string; primaryLabel: string }) {
+function CTA({
+  primaryHref,
+  primaryLabel,
+  isSignedIn,
+}: {
+  primaryHref: string
+  primaryLabel: string
+  isSignedIn: boolean
+}) {
   return (
     <section className="container py-16 md:py-24">
       <div className="relative overflow-hidden rounded-3xl bg-pie-radial border border-border p-10 md:p-14 text-center">
@@ -276,9 +319,11 @@ function CTA({ primaryHref, primaryLabel }: { primaryHref: string; primaryLabel:
                 {primaryLabel} <ArrowRight className="ml-1 h-5 w-5" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/login">Log in</Link>
-            </Button>
+            {isSignedIn ? null : (
+              <Button asChild size="lg" variant="outline">
+                <Link to="/login">Log in</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -286,7 +331,7 @@ function CTA({ primaryHref, primaryLabel }: { primaryHref: string; primaryLabel:
   )
 }
 
-function Footer() {
+function Footer({ isSignedIn }: { isSignedIn: boolean }) {
   return (
     <footer className="border-t border-border/60">
       <div className="container py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
@@ -296,8 +341,12 @@ function Footer() {
         </div>
         <div className="flex items-center gap-4">
           <span>© {new Date().getFullYear()} Pie</span>
-          <Link to="/login" className="hover:text-foreground">Log in</Link>
-          <Link to="/register" className="hover:text-foreground">Sign up</Link>
+          {isSignedIn ? null : (
+            <>
+              <Link to="/login" className="hover:text-foreground">Log in</Link>
+              <Link to="/register" className="hover:text-foreground">Sign up</Link>
+            </>
+          )}
         </div>
       </div>
     </footer>

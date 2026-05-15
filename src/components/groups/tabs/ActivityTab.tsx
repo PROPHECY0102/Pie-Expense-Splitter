@@ -40,16 +40,25 @@ type ActivityItem =
 
 export function ActivityTab() {
   const { group, members } = useGroupContext()
-  const expenses = useStore((s) =>
-    group ? s.expenses.filter((e) => e.groupId === group.id) : [],
-  )
-  const settlements = useStore((s) =>
-    group ? s.settlements.filter((st) => st.groupId === group.id) : [],
-  )
-  const invites = useStore((s) =>
-    group ? s.invites.filter((i) => i.groupId === group.id && i.status === 'accepted') : [],
-  )
+  const allExpenses = useStore((s) => s.expenses)
+  const allSettlements = useStore((s) => s.settlements)
+  const allInvites = useStore((s) => s.invites)
   const preferences = useStore((s) => s.preferences)
+  const expenses = useMemo(
+    () => (group ? allExpenses.filter((e) => e.groupId === group.id) : []),
+    [group, allExpenses],
+  )
+  const settlements = useMemo(
+    () => (group ? allSettlements.filter((st) => st.groupId === group.id) : []),
+    [group, allSettlements],
+  )
+  const invites = useMemo(
+    () =>
+      group
+        ? allInvites.filter((i) => i.groupId === group.id && i.status === 'accepted')
+        : [],
+    [group, allInvites],
+  )
 
   const items = useMemo<ActivityItem[]>(() => {
     if (!group) return []
