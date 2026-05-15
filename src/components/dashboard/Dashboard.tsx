@@ -27,7 +27,6 @@ export function Dashboard() {
   const groups = useStore((s) => s.groups)
   const expenses = useStore((s) => s.expenses)
   const settlements = useStore((s) => s.settlements)
-  const usersCount = useStore((s) => s.users.length)
   const invites = useStore((s) => s.invites)
   const preferences = useStore((s) => s.preferences)
 
@@ -262,7 +261,6 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <UsersHint usersCount={usersCount} />
     </div>
   )
 }
@@ -293,28 +291,6 @@ function BalancePill({
         {formatCents(Math.abs(cents), preferences)}
       </div>
     </div>
-  )
-}
-
-function UsersHint({ usersCount }: { usersCount: number }) {
-  if (usersCount > 1) return null
-  return (
-    <Card className="bg-filling/60 border-dashed">
-      <CardContent className="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <CardTitle className="text-lg">Demo tip · add another account</CardTitle>
-          <CardDescription className="mt-1">
-            Pie simulates multiple users on this device. Register a second account to invite,
-            accept, and settle — all without leaving the app.
-          </CardDescription>
-        </div>
-        <Button asChild variant="outline">
-          <Link to="/register">
-            <Plus className="h-4 w-4" /> Add another user
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
   )
 }
 

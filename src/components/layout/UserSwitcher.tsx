@@ -1,5 +1,5 @@
-import { Link, useNavigate } from '@tanstack/react-router'
-import { ChevronsUpDown, LogOut, UserPlus, Check } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { ChevronsUpDown, LogOut, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -27,15 +27,12 @@ export function UserSwitcher() {
       <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-border bg-background/70 pl-1 pr-3 py-1 hover:bg-accent/10 transition-colors">
         <UserAvatar user={current} size="sm" />
         <div className="text-left hidden sm:block leading-tight">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">
-            Acting as
-          </div>
           <div className="text-sm font-semibold">{current.name}</div>
         </div>
         <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel>Switch perspective</DropdownMenuLabel>
+        <DropdownMenuLabel>Profile</DropdownMenuLabel>
         {users.map((u) => (
           <DropdownMenuItem
             key={u.id}
@@ -55,12 +52,6 @@ export function UserSwitcher() {
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/register">
-            <UserPlus className="h-4 w-4" />
-            Add another account
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => {
             logout()

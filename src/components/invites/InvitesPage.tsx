@@ -1,42 +1,48 @@
-import { useMemo } from 'react'
-import { motion } from 'framer-motion'
-import { toast } from 'sonner'
-import { Check, Inbox, Send, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { EmptyState } from '@/components/common/EmptyState'
-import { UserAvatar } from '@/components/common/UserAvatar'
-import { Badge } from '@/components/ui/badge'
-import { useStore } from '@/store'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
-import { formatDistanceToNow } from 'date-fns'
-import { GroupIcon } from '@/components/groups/GroupIcon'
+import { useMemo } from "react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { Check, Inbox, Send, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmptyState } from "@/components/common/EmptyState";
+import { UserAvatar } from "@/components/common/UserAvatar";
+import { Badge } from "@/components/ui/badge";
+import { useStore } from "@/store";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { formatDistanceToNow } from "date-fns";
+import { GroupIcon } from "@/components/groups/GroupIcon";
 
 export function InvitesPage() {
-  const current = useCurrentUser()
-  const invites = useStore((s) => s.invites)
-  const groups = useStore((s) => s.groups)
-  const users = useStore((s) => s.users)
-  const acceptInvite = useStore((s) => s.acceptInvite)
-  const declineInvite = useStore((s) => s.declineInvite)
-  const cancelInvite = useStore((s) => s.cancelInvite)
+  const current = useCurrentUser();
+  const invites = useStore((s) => s.invites);
+  const groups = useStore((s) => s.groups);
+  const users = useStore((s) => s.users);
+  const acceptInvite = useStore((s) => s.acceptInvite);
+  const declineInvite = useStore((s) => s.declineInvite);
+  const cancelInvite = useStore((s) => s.cancelInvite);
 
   const incoming = useMemo(() => {
-    if (!current) return []
+    if (!current) return [];
     return invites
-      .filter((i) => i.toUserId === current.id && i.status === 'pending')
-      .sort((a, b) => b.createdAt - a.createdAt)
-  }, [invites, current])
+      .filter((i) => i.toUserId === current.id && i.status === "pending")
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }, [invites, current]);
 
   const outgoing = useMemo(() => {
-    if (!current) return []
+    if (!current) return [];
     return invites
       .filter((i) => i.fromUserId === current.id)
-      .sort((a, b) => b.createdAt - a.createdAt)
-  }, [invites, current])
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }, [invites, current]);
 
-  if (!current) return null
+  if (!current) return null;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -50,7 +56,7 @@ export function InvitesPage() {
       <Tabs defaultValue="incoming">
         <TabsList>
           <TabsTrigger value="incoming">
-            <Inbox className="h-4 w-4" /> Incoming
+            <Inbox className="mr-2 h-4 w-4" /> Incoming
             {incoming.length > 0 ? (
               <Badge variant="berry" className="ml-2">
                 {incoming.length}
@@ -58,7 +64,7 @@ export function InvitesPage() {
             ) : null}
           </TabsTrigger>
           <TabsTrigger value="outgoing">
-            <Send className="h-4 w-4" /> Sent
+            <Send className="mr-2 h-4 w-4" /> Sent
           </TabsTrigger>
         </TabsList>
 
@@ -72,9 +78,9 @@ export function InvitesPage() {
           ) : (
             <ul className="space-y-3">
               {incoming.map((inv, i) => {
-                const group = groups.find((g) => g.id === inv.groupId)
-                const from = users.find((u) => u.id === inv.fromUserId)
-                if (!group || !from) return null
+                const group = groups.find((g) => g.id === inv.groupId);
+                const from = users.find((u) => u.id === inv.fromUserId);
+                if (!group || !from) return null;
                 return (
                   <motion.li
                     key={inv.id}
@@ -89,12 +95,16 @@ export function InvitesPage() {
                             <GroupIcon iconKey={group.iconKey} />
                           </div>
                           <div className="flex-1">
-                            <CardTitle className="text-xl">{group.name}</CardTitle>
+                            <CardTitle className="text-xl">
+                              {group.name}
+                            </CardTitle>
                             <CardDescription className="flex items-center gap-2 mt-1">
                               <UserAvatar user={from} size="xs" />
                               <span>
-                                {from.name} invited you ·{' '}
-                                {formatDistanceToNow(new Date(inv.createdAt), { addSuffix: true })}
+                                {from.name} invited you ·{" "}
+                                {formatDistanceToNow(new Date(inv.createdAt), {
+                                  addSuffix: true,
+                                })}
                               </span>
                             </CardDescription>
                           </div>
@@ -104,8 +114,8 @@ export function InvitesPage() {
                         <Button
                           variant="outline"
                           onClick={() => {
-                            declineInvite(inv.id)
-                            toast.info('Invitation declined')
+                            declineInvite(inv.id);
+                            toast.info("Invitation declined");
                           }}
                         >
                           <X className="h-4 w-4" /> Decline
@@ -113,8 +123,8 @@ export function InvitesPage() {
                         <Button
                           variant="berry"
                           onClick={() => {
-                            acceptInvite(inv.id)
-                            toast.success(`Joined ${group.name}`)
+                            acceptInvite(inv.id);
+                            toast.success(`Joined ${group.name}`);
                           }}
                         >
                           <Check className="h-4 w-4" /> Accept
@@ -122,7 +132,7 @@ export function InvitesPage() {
                       </CardContent>
                     </Card>
                   </motion.li>
-                )
+                );
               })}
             </ul>
           )}
@@ -138,9 +148,9 @@ export function InvitesPage() {
           ) : (
             <ul className="space-y-2">
               {outgoing.map((inv) => {
-                const group = groups.find((g) => g.id === inv.groupId)
-                const to = users.find((u) => u.id === inv.toUserId)
-                if (!group || !to) return null
+                const group = groups.find((g) => g.id === inv.groupId);
+                const to = users.find((u) => u.id === inv.toUserId);
+                if (!group || !to) return null;
                 return (
                   <li
                     key={inv.id}
@@ -152,35 +162,38 @@ export function InvitesPage() {
                         {to.name} · {group.name}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Sent {formatDistanceToNow(new Date(inv.createdAt), { addSuffix: true })}
+                        Sent{" "}
+                        {formatDistanceToNow(new Date(inv.createdAt), {
+                          addSuffix: true,
+                        })}
                       </div>
                     </div>
-                    {inv.status === 'pending' ? (
+                    {inv.status === "pending" ? (
                       <>
                         <Badge variant="outline">Pending</Badge>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => {
-                            cancelInvite(inv.id)
-                            toast.info('Invitation withdrawn')
+                            cancelInvite(inv.id);
+                            toast.info("Invitation withdrawn");
                           }}
                         >
                           Withdraw
                         </Button>
                       </>
-                    ) : inv.status === 'accepted' ? (
+                    ) : inv.status === "accepted" ? (
                       <Badge variant="success">Accepted</Badge>
                     ) : (
                       <Badge variant="secondary">Declined</Badge>
                     )}
                   </li>
-                )
+                );
               })}
             </ul>
           )}
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
