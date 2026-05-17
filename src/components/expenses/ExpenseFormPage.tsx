@@ -69,8 +69,18 @@ export function ExpenseFormPage({ mode }: ExpenseFormPageProps) {
   const params = useParams({ strict: false }) as { groupId?: string; expenseId?: string }
   const groupId = params.groupId
   const expenseId = params.expenseId
-  const { group, members } = useGroupContext()
+  const { group, members: rawMembers } = useGroupContext()
   const currentUserId = useCurrentUserId()
+
+  // Put the current user first so the form's split rows are anchored to "you"
+  // — without this the first row is whichever member registered earliest,
+  // which makes it easy to type your percentage into someone else's box.
+  const members = useMemo(() => {
+    if (!currentUserId) return rawMembers
+    const me = rawMembers.find((m) => m.id === currentUserId)
+    if (!me) return rawMembers
+    return [me, ...rawMembers.filter((m) => m.id !== currentUserId)]
+  }, [rawMembers, currentUserId])
   const preferences = useStore((s) => s.preferences)
   const addExpense = useStore((s) => s.addExpense)
   const updateExpense = useStore((s) => s.updateExpense)
@@ -231,25 +241,29 @@ export function ExpenseFormPage({ mode }: ExpenseFormPageProps) {
               <FormField
                 control={form.control}
                 name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          {currencySymbol(preferences.currency, preferences.locale)}
-                        </span>
-                        <Input
-                          inputMode="decimal"
-                          placeholder="0.00"
-                          className="pl-7 tabular-nums"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const symbol = currencySymbol(preferences.currency, preferences.locale)
+                  return (
+                    <FormItem>
+                      <FormLabel>Amount</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            {symbol}
+                          </span>
+                          <Input
+                            inputMode="decimal"
+                            placeholder="0.00"
+                            className="tabular-nums"
+                            style={{ paddingLeft: `calc(${symbol.length}ch + 1.25rem)` }}
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
               <FormField
                 control={form.control}
@@ -281,6 +295,9 @@ export function ExpenseFormPage({ mode }: ExpenseFormPageProps) {
                               <span className="inline-flex items-center gap-2">
                                 <UserAvatar user={m} size="xs" />
                                 {m.name}
+                                {m.id === currentUserId ? (
+                                  <span className="text-xs text-muted-foreground">(You)</span>
+                                ) : null}
                               </span>
                             </SelectItem>
                           ))}
@@ -364,6 +381,7 @@ export function ExpenseFormPage({ mode }: ExpenseFormPageProps) {
                 onChange={setInputs}
                 totalCents={totalCents}
                 preferences={preferences}
+                currentUserId={currentUserId}
               />
 
               {splitError ? (

@@ -242,6 +242,7 @@ function RecordSettlementDialog({
   onSubmit,
 }: RecordDialogProps) {
   const preferences = useStore((s) => s.preferences)
+  const symbol = currencySymbol(preferences.currency, preferences.locale)
   const [from, setFrom] = useState<string>(prefilled?.from ?? currentUserId)
   const [to, setTo] = useState<string>(prefilled?.to ?? '')
   const [amount, setAmount] = useState<string>(
@@ -316,12 +317,13 @@ function RecordSettlementDialog({
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Amount</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                {currencySymbol(preferences.currency, preferences.locale)}
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                {symbol}
               </span>
               <Input
                 inputMode="decimal"
-                className="pl-7 tabular-nums"
+                className="tabular-nums"
+                style={{ paddingLeft: `calc(${symbol.length}ch + 1.25rem)` }}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Check } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { UserAvatar } from '@/components/common/UserAvatar'
 import { resolveSplit, validateSplit } from '@/lib/split'
 import { formatCents, parseCurrencyToCents } from '@/lib/currency'
@@ -13,6 +14,7 @@ interface SplitEditorProps {
   onChange: (next: Record<ID, number>) => void
   totalCents: number
   preferences: Preferences
+  currentUserId?: ID | null
 }
 
 interface MethodAwareProps extends SplitEditorProps {
@@ -62,17 +64,32 @@ function MemberRow({
   children,
   resolvedCents,
   preferences,
+  isCurrentUser,
 }: {
   user: User
   children: React.ReactNode
   resolvedCents?: number
   preferences: Preferences
+  isCurrentUser?: boolean
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-background/60 px-3 py-2.5">
+    <div
+      className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 ${
+        isCurrentUser
+          ? 'border-accent/40 bg-accent/10'
+          : 'border-border bg-background/60'
+      }`}
+    >
       <UserAvatar user={user} size="sm" />
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">{user.name}</div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-medium truncate">{user.name}</span>
+          {isCurrentUser ? (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+              You
+            </Badge>
+          ) : null}
+        </div>
         {resolvedCents !== undefined ? (
           <div className="text-xs text-muted-foreground tabular-nums">
             Share: {formatCents(resolvedCents, preferences)}
@@ -85,7 +102,7 @@ function MemberRow({
 }
 
 /** EQUAL: each user has input=1 if included, 0 otherwise. */
-function EqualSplitEditor({ members, inputs, onChange, totalCents, preferences }: SplitEditorProps) {
+function EqualSplitEditor({ members, inputs, onChange, totalCents, preferences, currentUserId }: SplitEditorProps) {
   const resolved = useResolvedSplit('equal', inputs, totalCents)
   function toggle(userId: ID) {
     onChange({ ...inputs, [userId]: inputs[userId] > 0 ? 0 : 1 })
@@ -116,6 +133,7 @@ function EqualSplitEditor({ members, inputs, onChange, totalCents, preferences }
       <div className="space-y-1.5">
         {members.map((m) => {
           const included = inputs[m.id] > 0
+          const isMe = m.id === currentUserId
           return (
             <button
               key={m.id}
@@ -129,7 +147,14 @@ function EqualSplitEditor({ members, inputs, onChange, totalCents, preferences }
             >
               <UserAvatar user={m} size="sm" />
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium truncate">{m.name}</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-medium truncate">{m.name}</span>
+                  {isMe ? (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                      You
+                    </Badge>
+                  ) : null}
+                </div>
                 {included ? (
                   <div className="text-xs text-muted-foreground tabular-nums">
                     Share: {formatCents(resolved.get(m.id) ?? 0, preferences)}
@@ -154,7 +179,7 @@ function EqualSplitEditor({ members, inputs, onChange, totalCents, preferences }
 }
 
 /** EXACT: each user enters cents directly. */
-function ExactSplitEditor({ members, inputs, onChange, totalCents, preferences }: SplitEditorProps) {
+function ExactSplitEditor({ members, inputs, onChange, totalCents, preferences, currentUserId }: SplitEditorProps) {
   const allocated = Object.values(inputs).reduce((a, b) => a + (b || 0), 0)
   const remaining = totalCents - allocated
   return (
@@ -175,7 +200,12 @@ function ExactSplitEditor({ members, inputs, onChange, totalCents, preferences }
       </div>
       <div className="space-y-1.5">
         {members.map((m) => (
-          <MemberRow key={m.id} user={m} preferences={preferences}>
+          <MemberRow
+            key={m.id}
+            user={m}
+            preferences={preferences}
+            isCurrentUser={m.id === currentUserId}
+          >
             <Input
               inputMode="decimal"
               className="w-32 text-right tabular-nums"
@@ -200,6 +230,7 @@ function PercentageSplitEditor({
   onChange,
   totalCents,
   preferences,
+  currentUserId,
 }: SplitEditorProps) {
   const resolved = useResolvedSplit('percentage', inputs, totalCents)
   const sumBp = Object.values(inputs).reduce((a, b) => a + (b || 0), 0)
@@ -226,6 +257,7 @@ function PercentageSplitEditor({
             key={m.id}
             user={m}
             preferences={preferences}
+            isCurrentUser={m.id === currentUserId}
             resolvedCents={inputs[m.id] > 0 ? resolved.get(m.id) ?? 0 : undefined}
           >
             <div className="flex items-center">
@@ -252,7 +284,7 @@ function PercentageSplitEditor({
 }
 
 /** SHARES: each user gets an integer share count. */
-function SharesSplitEditor({ members, inputs, onChange, totalCents, preferences }: SplitEditorProps) {
+function SharesSplitEditor({ members, inputs, onChange, totalCents, preferences, currentUserId }: SplitEditorProps) {
   const resolved = useResolvedSplit('shares', inputs, totalCents)
   const total = Object.values(inputs).reduce((a, b) => a + (b || 0), 0)
   return (
@@ -266,6 +298,7 @@ function SharesSplitEditor({ members, inputs, onChange, totalCents, preferences 
             key={m.id}
             user={m}
             preferences={preferences}
+            isCurrentUser={m.id === currentUserId}
             resolvedCents={inputs[m.id] > 0 ? resolved.get(m.id) ?? 0 : undefined}
           >
             <div className="flex items-center gap-1">
