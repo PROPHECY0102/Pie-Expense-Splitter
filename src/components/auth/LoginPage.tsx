@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { UserPlus } from 'lucide-react'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import {
   Form,
@@ -30,7 +29,6 @@ type FormValues = z.infer<typeof schema>
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const users = useStore((s) => s.users)
   const loginWithPassword = useStore((s) => s.loginWithPassword)
 
   const form = useForm<FormValues>({
@@ -50,29 +48,6 @@ export function LoginPage() {
     }
     toast.success(`Welcome back, ${result.user.name}`)
     navigate({ to: '/app' })
-  }
-
-  if (users.length === 0) {
-    return (
-      <AuthLayout
-        title="No accounts yet"
-        subtitle="Create your first account to start using Pie."
-        footer={
-          <span className="text-muted-foreground">
-            Already registered elsewhere?{' '}
-            <Link to="/register" className="text-accent hover:underline">
-              Sign up
-            </Link>
-          </span>
-        }
-      >
-        <Button asChild className="w-full" size="lg">
-          <Link to="/register">
-            <UserPlus className="h-4 w-4" /> Create your first account
-          </Link>
-        </Button>
-      </AuthLayout>
-    )
   }
 
   return (
